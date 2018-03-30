@@ -1,0 +1,8 @@
+﻿<Window x:Class="PdfCutter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:PdfCutter="clr-namespace:PdfCutter"
+        Title="PdfCutter" Height="200" Width="300">
+    <Grid>
+        <PdfCutter:SplitPageInHalfView/>
+    </Grid>
+</Window>
