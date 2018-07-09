@@ -126,14 +126,31 @@
             for (int i = 0; i < input.PageCount; i++)
             {
                 var page = input.Pages[i];
-                var halfWidth = page.Width / 2;
-                var sz = new XSize(halfWidth, page.Height);
 
-                page.CropBox = new PdfRectangle(new XPoint(0, 0), sz);
-                output.AddPage(page);
-                
-                page.CropBox = new PdfRectangle(new XPoint(halfWidth, 0), sz);
-                output.AddPage(page);
+                // if heigt bigger width cut horizontally
+                // weird orientation pages in dock
+                if (page.Height > page.Width)
+                {
+                    var halfHeight = page.Height / 2;
+                    var sz = new XSize(page.Width, halfHeight);
+
+                    page.CropBox = new PdfRectangle(new XPoint(0, 0), sz);
+                    output.AddPage(page);
+
+                    page.CropBox = new PdfRectangle(new XPoint(0, halfHeight), sz);
+                    output.AddPage(page);
+                }
+                else
+                {
+                    var halfWidth = page.Width / 2;
+                    var sz = new XSize(halfWidth, page.Height);
+
+                    page.CropBox = new PdfRectangle(new XPoint(0, 0), sz);
+                    output.AddPage(page);
+
+                    page.CropBox = new PdfRectangle(new XPoint(halfWidth, 0), sz);
+                    output.AddPage(page);
+                }
             }
 
             this.outputFile = output;
