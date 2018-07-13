@@ -16,7 +16,8 @@
         private bool fileHandled;
         private PdfDocument outputFile;
         private bool openFileAfterSave;
-
+        private bool selectPagesInInversedOrder;
+        
         public SplitPageInHalfViewModel()
         {
             this.OpenFileCommand = new DelegateCommand(this.ExecuteOpenFileCommand, this.CanExecuteOpenFileCommand);
@@ -25,6 +26,12 @@
         }
 
         #region Property
+
+        public DelegateCommand OpenFileCommand { get; private set; }
+
+        public DelegateCommand SaveFileCommand { get; private set; }
+
+        public DelegateCommand HandleFileCommand { get; private set; }
 
         public bool IsBusy
         {
@@ -52,11 +59,12 @@
             set { this.SetProperty(ref this.openFileAfterSave, value); }
         }
 
-        public DelegateCommand OpenFileCommand { get; private set; }
+        public bool SelectPagesInInversedOrder
+        {
+            get { return this.selectPagesInInversedOrder; }
 
-        public DelegateCommand SaveFileCommand { get; private set; }
-
-        public DelegateCommand HandleFileCommand { get; private set; }
+            set { this.SetProperty(ref this.selectPagesInInversedOrder, value); }
+        }
 
         #endregion
 
@@ -127,33 +135,44 @@
             {
                 var page = input.Pages[i];
 
-                // if heigt bigger width cut horizontally
-                // weird orientation pages in dock
-                if (page.Height > page.Width)
-                {
-                    var halfHeight = page.Height / 2;
-                    var sz = new XSize(page.Width, halfHeight);
-
-                    page.CropBox = new PdfRectangle(new XPoint(0, 0), sz);
-                    output.AddPage(page);
-
-                    page.CropBox = new PdfRectangle(new XPoint(0, halfHeight), sz);
-                    output.AddPage(page);
-                }
-                else
-                {
-                    var halfWidth = page.Width / 2;
-                    var sz = new XSize(halfWidth, page.Height);
-
-                    page.CropBox = new PdfRectangle(new XPoint(0, 0), sz);
-                    output.AddPage(page);
-
-                    page.CropBox = new PdfRectangle(new XPoint(halfWidth, 0), sz);
-                    output.AddPage(page);
-                }
+                CutPage(page, output, page.Width >= page.Height, this.selectPagesInInversedOrder);
             }
 
             this.outputFile = output;
+        }
+
+        private static void CutPage(PdfPage source, PdfDocument destination, bool cutVertically, bool inversedPageOrder)
+        {
+            double halfSize;
+            XSize pageSize;
+            PdfRectangle page1, page2;
+
+            if (cutVertically)
+            {
+                halfSize = source.Width / 2;
+                pageSize = new XSize(halfSize, source.Height);
+                page1 = new PdfRectangle(new XPoint(0, 0), pageSize);
+                page2 = new PdfRectangle(new XPoint(halfSize, 0), pageSize);
+            }
+            else
+            {
+                halfSize = source.Height / 2;
+                pageSize = new XSize(source.Width, halfSize);
+                page1 = new PdfRectangle(new XPoint(0, 0), pageSize);
+                page2 = new PdfRectangle(new XPoint(0, halfSize), pageSize);
+            }
+
+            if (inversedPageOrder)
+            {
+                var t = page1;
+                page1 = page2;
+                page2 = t;
+            }
+
+            source.CropBox = page1;
+            destination.AddPage(source);
+            source.CropBox = page2;
+            destination.AddPage(source);
         }
     }
 }

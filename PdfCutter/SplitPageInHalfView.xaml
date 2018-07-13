@@ -21,7 +21,13 @@
             <TextBlock Text="File" Margin="2"/>
             <TextBox Text="{Binding FileName}" Margin="2" IsReadOnly="True" MinWidth="150" TextWrapping="Wrap"/>
         </WrapPanel>
-        
+
+        <WrapPanel DockPanel.Dock="Top">
+            <TextBlock Text="Page order" Margin="2"/>
+            <ToggleButton IsChecked="{Binding SelectPagesInInversedOrder, Converter={ViewModel:NotBoolOperatorConverter}}" Content="1 | 2" Margin="2"/>
+            <ToggleButton IsChecked="{Binding SelectPagesInInversedOrder}" Content="2 | 1" Margin="2"/>
+        </WrapPanel>
+
         <ProgressBar DockPanel.Dock="Top" Height="18" Margin="2" HorizontalAlignment="Stretch" IsIndeterminate="True"
                      Orientation="Horizontal" Visibility="{Binding IsBusy, Converter={ViewModel:BoolToVisibilityConverter}}"/>
     </DockPanel>
